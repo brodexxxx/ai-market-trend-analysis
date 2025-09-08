@@ -149,19 +149,23 @@ def create_lag_features(df, max_lag=5):
     Create lagged features for time series analysis
     """
     df = df.copy()
-    
+
+    # Calculate Daily_Return if it doesn't exist
+    if 'Daily_Return' not in df.columns:
+        df['Daily_Return'] = df['Close'].pct_change()
+
     # Lagged price features
     for lag in range(1, max_lag + 1):
         df[f'Close_Lag_{lag}'] = df['Close'].shift(lag)
         df[f'Volume_Lag_{lag}'] = df['Volume'].shift(lag)
         df[f'Return_Lag_{lag}'] = df['Daily_Return'].shift(lag)
-    
+
     # Rolling statistics
     df['Rolling_Mean_5'] = df['Close'].rolling(window=5).mean()
     df['Rolling_Std_5'] = df['Close'].rolling(window=5).std()
     df['Rolling_Mean_20'] = df['Close'].rolling(window=20).mean()
     df['Rolling_Std_20'] = df['Close'].rolling(window=20).std()
-    
+
     return df
 
 def handle_missing_values(df):

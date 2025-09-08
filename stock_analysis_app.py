@@ -17,7 +17,7 @@ def calculate_technical_indicators(df):
     # RSI
     delta = df['Close'].diff()
     gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window极速).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window).mean()
     rs = gain / loss
     df['RSI'] = 100 - (100 / (1 + rs))
     
@@ -145,7 +145,7 @@ if st.sidebar.button("Analyze Stock", type="primary"):
             
             with col2:
                 if 'MACD' in df.columns and 'Signal_Line' in df.columns:
-                    fig_macd = go.极速()
+                    fig_macd = go.()
                     fig_macd.add_trace(go.Scatter(x=df.index, y=df['MACD'], name='MACD'))
                     fig_macd.add_trace(go.Scatter(x=df.index, y=df['Signal_Line'], name='Signal Line'))
                     fig_macd.update_layout(title="MACD")

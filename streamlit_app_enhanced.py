@@ -12,6 +12,7 @@ import hashlib
 import hmac
 import base64
 import os
+import sys
 from cryptography.fernet import Fernet
 
 # Security functions
@@ -36,6 +37,66 @@ def decrypt_data(encrypted_data, key):
 # Generate a secure key (in production, this should be stored securely)
 SECRET_KEY = Fernet.generate_key().decode()
 
+# AI Stock Recommendation function
+def generate_ai_stock_recommendation(df, symbol):
+    """Generate AI-powered stock recommendation based on technical analysis"""
+    if df is None or df.empty:
+        return "⚠️ Insufficient data for AI recommendation"
+    
+    current_price = df['Close'].iloc[-1]
+    sma_20 = df['SMA_20'].iloc[-1]
+    sma_50 = df['SMA_50'].iloc[-1]
+    rsi = df['RSI'].iloc[-1]
+    macd = df['MACD'].iloc[-1]
+    signal = df['Signal_Line'].iloc[-1]
+    
+    # AI analysis logic
+    bullish_signals = 0
+    bearish_signals = 0
+    
+    # Price vs Moving Averages
+    if current_price > sma_20:
+        bullish_signals += 1
+    else:
+        bearish_signals += 1
+        
+    if current_price > sma_50:
+        bullish_signals += 1
+    else:
+        bearish_signals += 1
+    
+    # RSI analysis
+    if rsi < 30:
+        bullish_signals += 2  # Strong oversold signal
+    elif rsi > 70:
+        bearish_signals += 2  # Strong overbought signal
+    elif 30 <= rsi <= 50:
+        bullish_signals += 1
+    else:
+        bearish_signals += 1
+    
+    # MACD analysis
+    if macd > signal:
+        bullish_signals += 1
+    else:
+        bearish_signals += 1
+    
+    # Volume analysis
+    avg_volume = df['Volume'].mean()
+    recent_volume = df['Volume'].iloc[-5:].mean()
+    if recent_volume > avg_volume * 1.2:
+        bullish_signals += 1
+    
+    # Generate recommendation
+    if bullish_signals - bearish_signals >= 3:
+        return f"🎯 **STRONG BUY** - {symbol} shows multiple bullish signals for potential growth"
+    elif bullish_signals - bearish_signals >= 1:
+        return f"👍 **BUY** - {symbol} demonstrates favorable conditions for investment"
+    elif bullish_signals == bearish_signals:
+        return f"🤔 **HOLD** - {symbol} shows mixed signals, consider waiting"
+    else:
+        return f"⏸️ **WAIT** - {symbol} shows bearish tendencies, wait for better entry"
+    
 # Long-term investment recommendation function
 def generate_long_term_recommendation(df, symbol):
     """Generate long-term investment recommendation based on technical analysis"""
@@ -55,12 +116,12 @@ def generate_long_term_recommendation(df, symbol):
         if current_price > sma_200:
             recommendation += "✅ **Price above 200-day SMA** - Bullish long-term trend\n"
         else:
-            recommendation += "⚠️ **Price below 200-day SMA** - Bearish long-term trend\n"
+            recommendation += "⚠️ **Price below 200-day SMA** - Bearish long-term trend极n"
     
     if current_price > sma_50:
         recommendation += "✅ **Price above 50-day SMA** - Medium-term bullish\n"
     else:
-        recommendation += "⚠️ **Price below 50-day SMA** - Medium-term bearish\n"
+        recommendation += "⚠️ **Price below 50极day SMA** - Medium-term bearish\n"
     
     # RSI analysis
     if rsi < 30:
@@ -87,8 +148,8 @@ def generate_long_term_recommendation(df, symbol):
     if bullish_signals >= 3:
         recommendation += "\n🎯 **STRONG BUY** - Multiple bullish indicators align for long-term growth"
     elif bullish_signals >= 2:
-        recommendation += "\n👍 **BUY** - Favorable conditions for long-term investment"
-    elif bullish_signals >= 1:
+        recommendation += "\n👍 **极UY** - Favorable conditions for long-term investment"
+    elif bullish_signals >= 极:
         recommendation += "\n🤔 **HOLD** - Monitor for better entry points"
     else:
         recommendation += "\n⏸️ **WAIT** - Consider waiting for more favorable conditions"
@@ -99,7 +160,7 @@ def generate_long_term_recommendation(df, symbol):
 def fetch_stock_data(symbol, period):
     try:
         # Handle different symbol formats
-        if not symbol.endswith('.NS') and symbol not in ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'NVDA']:
+        if not symbol.endswith('.NS') and symbol not in ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TS极A', 'NVDA']:
             symbol += '.NS'  # Assume Indian stock if not a common US stock
         
         stock = yf.Ticker(symbol)
@@ -114,6 +175,8 @@ def fetch_stock_data(symbol, period):
         if hist.empty:
             st.info(f"Real-time data for {symbol} is currently unavailable. Using sample data for demonstration.")
             # Generate sample data for demonstration
+            return generate_sample_data(symbol, period)
+            
             return generate_sample_data(symbol, period)
             
         return hist
@@ -295,15 +358,24 @@ def fetch_market_news():
             }
         ]
 
-st.set_page_config(page_title="AI Stock Market Analysis", layout="wide")
+st.set_page_config(page_title="AI Market Trends Analyzer", layout="wide")
 
-# Navigation
-page = st.sidebar.selectbox("Navigate", ["Landing Page", "Stock Analysis", "TradingView Charts", "AI Chat Assistant", "Market News"])
+# Navigation - Initialize session state for page
+if 'page' not in st.session_state:
+    st.session_state.page = "Landing Page"
 
-if page == "Landing Page":
-    st.title("Welcome to Positivus")
-    st.markdown("### Your AI-Powered Stock Market Analysis Platform")
-    st.image("https://via.placeholder.com/800x400?text=Positivus+Landing+Page")
+# Sidebar navigation
+page = st.sidebar.selectbox("Navigate", ["Landing Page", "Stock Analysis", "TradingView Charts", "AI Chat Assistant", "Market News", "System Diagnostics"], index=["Landing Page", "Stock Analysis", "TradingView Charts", "AI Chat Assistant", "Market News", "System Diagnostics"].index(st.session_state.page))
+
+# Update session state when page changes
+if page != st.session_state.page:
+    st.session_state.page = page
+    st.rerun()
+
+if st.session_state.page == "Landing Page":
+    st.title("Welcome to AI Market Trends Analyzer")
+    st.markdown("### Your Advanced AI-Powered Stock Market Analysis Platform")
+    st.image("https://via.placeholder.com/800x400?text=AI+Market+Trends+Analyzer")
     
     # Call to Action
     st.markdown("#### Get Started with Our Features")
@@ -345,7 +417,7 @@ if page == "Landing Page":
     
     # Footer
     st.markdown("---")
-    st.caption("📊 Powered by AI Market Trend Analysis | Real-time data from Yahoo Finance")
+    st.caption("📊 Powered by AI Market Trends Analyzer | Real-time data from Yahoo Finance")
     
 elif page == "TradingView Charts":
     st.title("📊 TradingView Advanced Charts")
@@ -354,10 +426,10 @@ elif page == "TradingView Charts":
     # TradingView widget integration
     st.markdown("### Interactive TradingView Charts")
     
-    # Stock selection for TradingView
+    # Stock selection for TradingView - 23 US and 23 Indian stocks
     tradingview_symbols = {
-        "US Stocks": ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "NVDA"],
-        "Indian Stocks": ["RELIANCE", "TCS", "HDFCBANK", "INFY", "ICICIBANK"]
+        "US Stocks": ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "NVDA", "META", "BRK-B", "JPM", "JNJ", "V", "WMT", "PG", "UNH", "HD", "BAC", "MA", "DIS", "NFLX", "ADBE", "CRM", "KO", "PEP"],
+        "Indian Stocks": ["RELIANCE", "TCS", "HDFCBANK", "INFY", "ICICIBANK", "HINDUNILVR", "SBIN", "BHARTIARTL", "ITC", "KOTAKBANK", "AXISBANK", "LT", "BAJFINANCE", "HCLTECH", "ASIANPAINT", "MARUTI", "TATASTEEL", "SUNPHARMA", "M&M", "NTPC", "POWERGRID", "WIPRO", "ADANIENT"]
     }
     
     selected_tv_category = st.selectbox("Select Market:", list(tradingview_symbols.keys()), index=0)
@@ -417,7 +489,7 @@ elif page == "Stock Analysis":
     # Sidebar for stock selection and settings
     st.sidebar.header("📊 Stock Selection")
 
-    # Popular stocks list
+    # Popular stocks list - 23 US and 23 Indian stocks
     popular_stocks = {
         "US Stocks": {
             "Apple (AAPL)": "AAPL",
@@ -425,14 +497,49 @@ elif page == "Stock Analysis":
             "Google (GOOGL)": "GOOGL",
             "Amazon (AMZN)": "AMZN",
             "Tesla (TSLA)": "TSLA",
-            "NVIDIA (NVDA)": "NVDA"
+            "NVIDIA (NVDA)": "NVDA",
+            "Meta Platforms (META)": "META",
+            "Berkshire Hathaway (BRK-B)": "BRK-B",
+            "JPMorgan Chase (JPM)": "JPM",
+            "Johnson & Johnson (JNJ)": "JNJ",
+            "Visa (V)": "V",
+            "Walmart (WMT)": "WMT",
+            "Procter & Gamble (PG)": "PG",
+            "UnitedHealth (UNH)": "UNH",
+            "Home Depot (HD)": "HD",
+            "Bank of America (BAC)": "BAC",
+            "Mastercard (MA)": "MA",
+            "Disney (DIS)": "DIS",
+            "Netflix (NFLX)": "NFLX",
+            "Adobe (ADBE)": "ADBE",
+            "Salesforce (CRM)": "CRM",
+            "Coca-Cola (KO)": "KO",
+            "PepsiCo (PEP)": "PEP"
         },
         "Indian Stocks": {
             "Reliance (RELIANCE.NS)": "RELIANCE.NS",
             "TCS (TCS.NS)": "TCS.NS",
             "HDFC Bank (HDFCBANK.NS)": "HDFCBANK.NS",
             "Infosys (INFY.NS)": "INFY.NS",
-            "ICICI Bank (ICICIBANK.NS)": "ICICIBANK.NS"
+            "ICICI Bank (ICICIBANK.NS)": "ICICIBANK.NS",
+            "Hindustan Unilever (HINDUNILVR.NS)": "HINDUNILVR.NS",
+            "State Bank of India (SBIN.NS)": "SBIN.NS",
+            "Bharti Airtel (BHARTIARTL.NS)": "BHARTIARTL.NS",
+            "ITC (ITC.NS)": "ITC.NS",
+            "Kotak Mahindra Bank (KOTAKBANK.NS)": "KOTAKBANK.NS",
+            "Axis Bank (AXISBANK.NS)": "AXISBANK.NS",
+            "Larsen & Toubro (LT.NS)": "LT.NS",
+            "Bajaj Finance (BAJFINANCE.NS)": "BAJFINANCE.NS",
+            "HCL Technologies (HCLTECH.NS)": "HCLTECH.NS",
+            "Asian Paints (ASIANPAINT.NS)": "ASIANPAINT.NS",
+            "Maruti Suzuki (MARUTI.NS)": "MARUTI.NS",
+            "Tata Steel (TATASTEEL.NS)": "TATASTEEL.NS",
+            "Sun Pharma (SUNPHARMA.NS)": "SUNPHARMA.NS",
+            "Mahindra & Mahindra (M&M.NS)": "M&M.NS",
+            "NTPC (NTPC.NS)": "NTPC.NS",
+            "Power Grid (POWERGRID.NS)": "POWERGRID.NS",
+            "Wipro (WIPRO.NS)": "WIPRO.NS",
+            "Adani Enterprises (ADANIENT.NS)": "ADANIENT.NS"
         }
     }
 
@@ -543,8 +650,13 @@ elif page == "Stock Analysis":
                         st.metric("Volume (Avg)", f"{df['Volume'].mean():,.0f}")
                         st.metric("Volatility", f"{df['Close'].pct_change().std()*100:.2f}%")
                     
+                    # AI Recommendation Box
+                    st.markdown("### 🤖 AI Investment Recommendation")
+                    ai_recommendation = generate_ai_stock_recommendation(df, symbol)
+                    st.info(ai_recommendation)
+                    
                     # Long-term investment recommendation
-                    st.markdown("### 🎯 Long-Term Investment Recommendation")
+                    st.markdown("### 🎯 Long-Term Investment Outlook")
                     recommendation = generate_long_term_recommendation(df, symbol)
                     st.markdown(recommendation)
                     
@@ -557,6 +669,62 @@ elif page == "Stock Analysis":
                         st.warning("**Medium Volatility** - Moderate risk")
                     else:
                         st.error("**High Volatility** - High risk investment")
+                    
+                    # TradingView Chart for the analyzed stock - Larger size (approx 6cm height)
+                    st.markdown("### 📊 Live TradingView Chart")
+                    tradingview_symbol = symbol.replace('.NS', '') if symbol.endswith('.NS') else symbol
+                    exchange = "NSE" if symbol.endswith('.NS') else "NASDAQ"
+                    
+                    # Larger TradingView widget with real-time data
+                    tv_widget_html = f"""
+                    <!-- TradingView Widget BEGIN -->
+                    <div class="tradingview-widget-container" style="height:600px; width:100%;">
+                      <div id="tradingview_{tradingview_symbol.lower()}" style="height:100%; width:100%;"></div>
+                      <div class="tradingview-widget-copyright">
+                        <a href="https://www.tradingview.com/" rel="noopener nofollow" target="_blank">
+                          <span class="blue-text">Track all markets on TradingView</span>
+                        </a>
+                      </div>
+                      <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+                      <script type="text/javascript">
+                      new TradingView.widget(
+                      {{
+                        "width": "100%",
+                        "height": "100%",
+                        "symbol": "{exchange}:{tradingview_symbol}",
+                        "interval": "D",
+                        "timezone": "Etc/UTC",
+                        "theme": "dark",
+                        "style": "1",
+                        "locale": "en",
+                        "toolbar_bg": "#f1f3f6",
+                        "enable_publishing": false,
+                        "hide_top_toolbar": false,
+                        "allow_symbol_change": true,
+                        "container_id": "tradingview_{tradingview_symbol.lower()}",
+                        "studies": [
+                          "RSI@tv-basicstudies",
+                          "MACD@tv-basicstudies",
+                          "StochasticRSI@tv-basicstudies",
+                          "MASimple@tv-basicstudies",
+                          "Volume@tv-basicstudies",
+                          "BB@tv-basicstudies"
+                        ],
+                        "drawings": [
+                          "LineTool@tv-basicdrawings",
+                          "RectangleTool@tv-basicdrawings",
+                          "TrendLineTool@tv-basicdrawings"
+                        ],
+                        "show_popup_button": true,
+                        "popup_width": "1000",
+                        "popup_height": "650"
+                      }});
+                      </script>
+                    </div>
+                    <!-- TradingView Widget END -->
+                    """
+                    
+                    st.components.v1.html(tv_widget_html, height=600, scrolling=False)
             
             else:
                 st.error("Failed to fetch stock data. Please try again.")
@@ -628,50 +796,62 @@ elif page == "Market News":
             
             st.markdown("---")
 
-# AI Response Generator Function
-def generate_ai_response(prompt):
-    """Generate AI responses based on user input"""
-    prompt_lower = prompt.lower()
+elif page == "System Diagnostics":
+    st.title("🤖 AI Diagnostic Bot")
+    st.markdown("---")
     
-    if any(word in prompt_lower for word in ["hello", "hi", "hey", "greetings"]):
-        return "Hello! I'm your AI investment assistant. How can I help you with your stock market questions today?"
+    st.info("""
+    **System Diagnostics Features:**
+    - Automatic detection of common system issues
+    - One-click fixes for package installations
+    - Data source connectivity checks
+    - System health monitoring
+    """)
     
-    elif any(word in prompt_lower for word in ["stock", "investment", "portfolio"]):
-        return """I can help you analyze stocks and provide investment insights. Here are some things I can do:
-        
-- Analyze specific stocks using technical indicators
-- Provide long-term investment recommendations  
-- Explain market trends and patterns
-- Help with portfolio diversification
-        
-Try asking me about a specific stock or investment strategy!"""
+    # Call the diagnostic bot function
+    ai_diagnostic_bot()
     
-    elif any(word in prompt_lower for word in ["trend", "market", "analysis"]):
-        return """Current market analysis suggests:
-        
-- Technology stocks are showing strong momentum
-- Renewable energy sector is gaining investor interest
-- Consider diversifying across different sectors
-- Monitor Federal Reserve policy changes for market impact"""
+    # Additional diagnostic information
+    st.markdown("### 📊 System Information")
     
-    elif any(word in prompt_lower for word in ["risk", "safe", "volatility"]):
-        return """Risk management is crucial in investing:
-        
-- Diversify across different asset classes
-- Consider your investment horizon
-- High volatility stocks offer higher potential returns but more risk
-- Blue-chip stocks generally offer more stability"""
+    col1, col2 = st.columns(2)
     
-    elif any(word in prompt_lower for word in ["help", "what can you do"]):
-        return """I'm an AI investment assistant that can:
+    with col1:
+        st.metric("Python Version", f"{sys.version.split()[0]}")
+        st.metric("Streamlit Version", st.__version__)
         
-1. Analyze stock performance and trends
-2. Provide technical analysis with indicators like RSI, MACD, moving averages
-3. Generate long-term investment recommendations
-4. Explain market patterns and signals
-5. Offer portfolio advice and risk assessment
+    with col2:
+        try:
+            import pandas as pd
+            st.metric("Pandas Version", pd.__version__)
+        except:
+            st.metric("Pandas Version", "Not installed")
         
-Feel free to ask me anything about stocks, investments, or market analysis!"""
+        try:
+            import numpy as np
+            st.metric("NumPy Version", np.__version__)
+        except:
+            st.metric("NumPy Version", "Not installed")
     
-    else:
-        return "I'm here to help with stock market analysis and investment advice. Could you please rephrase your question or ask about specific stocks, market trends, or investment strategies?"
+    # System health check
+    if st.button("🔄 Run Comprehensive System Check", type="primary"):
+        with st.spinner("Running comprehensive system diagnostics..."):
+            issues = detect_system_issues()
+            data_status = check_data_sources()
+            
+            if not issues:
+                st.success("✅ All systems operational!")
+            else:
+                st.error("⚠️ System issues detected:")
+                for issue in issues:
+                    st.write(f"- {issue}")
+            
+            st.info("📡 Data Source Status:")
+            for source, status in data_status.items():
+                if status == "✅ Online":
+                    st.success(f"{source}: {status}")
+                else:
+                    st.error(f"{source}: {status}")
+
+
+

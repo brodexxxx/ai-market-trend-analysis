@@ -331,14 +331,50 @@ popular_stocks = {
         "Google (GOOGL)": "GOOGL",
         "Amazon (AMZN)": "AMZN",
         "Tesla (TSLA)": "TSLA",
-        "NVIDIA (NVDA)": "NVDA"
+        "NVIDIA (NVDA)": "NVDA",
+        "Meta (META)": "META",
+        "Berkshire Hathaway (BRK.B)": "BRK.B",
+        "Johnson & Johnson (JNJ)": "JNJ",
+        "Visa (V)": "V",
+        "Procter & Gamble (PG)": "PG",
+        "Coca-Cola (KO)": "KO",
+        "Walmart (WMT)": "WMT",
+        "Disney (DIS)": "DIS",
+        "Intel (INTC)": "INTC",
+        "Pfizer (PFE)": "PFE",
+        "Cisco (CSCO)": "CSCO",
+        "PepsiCo (PEP)": "PEP",
+        "ExxonMobil (XOM)": "XOM",
+        "Chevron (CVX)": "CVX",
+        "AbbVie (ABBV)": "ABBV",
+        "Salesforce (CRM)": "CRM",
+        "Adobe (ADBE)": "ADBE",
+        "Netflix (NFLX)": "NFLX"
     },
     "Indian Giants": {
         "Reliance (RELIANCE.NS)": "RELIANCE.NS",
         "TCS (TCS.NS)": "TCS.NS",
         "HDFC Bank (HDFCBANK.NS)": "HDFCBANK.NS",
         "Infosys (INFY.NS)": "INFY.NS",
-        "ICICI Bank (ICICIBANK.NS)": "ICICIBANK.NS"
+        "ICICI Bank (ICICIBANK.NS)": "ICICIBANK.NS",
+        "Hindustan Unilever (HINDUNILVR.NS)": "HINDUNILVR.NS",
+        "Bharti Airtel (BHARTIARTL.NS)": "BHARTIARTL.NS",
+        "ITC (ITC.NS)": "ITC.NS",
+        "Kotak Mahindra Bank (KOTAKBANK.NS)": "KOTAKBANK.NS",
+        "Axis Bank (AXISBANK.NS)": "AXISBANK.NS",
+        "Larsen & Toubro (LT.NS)": "LT.NS",
+        "State Bank of India (SBIN.NS)": "SBIN.NS",
+        "Bajaj Finance (BAJFINANCE.NS)": "BAJFINANCE.NS",
+        "HCL Technologies (HCLTECH.NS)": "HCLTECH.NS",
+        "Asian Paints (ASIANPAINT.NS)": "ASIANPAINT.NS",
+        "Maruti Suzuki (MARUTI.NS)": "MARUTI.NS",
+        "Sun Pharma (SUNPHARMA.NS)": "SUNPHARMA.NS",
+        "Tata Steel (TATASTEEL.NS)": "TATASTEEL.NS",
+        "Wipro (WIPRO.NS)": "WIPRO.NS",
+        "NTPC (NTPC.NS)": "NTPC.NS",
+        "Power Grid (POWERGRID.NS)": "POWERGRID.NS",
+        "Adani Enterprises (ADANIENT.NS)": "ADANIENT.NS",
+        "Adani Ports (ADANIPORTS.NS)": "ADANIPORTS.NS"
     }
 }
 
@@ -472,17 +508,197 @@ if st.sidebar.button("🚀 Analyze Stock", type="primary"):
                 st.markdown(recommendation)
                 st.markdown('</div>', unsafe_allow_html=True)
                 
-                # TradingView integration placeholder
-                st.markdown("### 📊 TradingView Integration")
-                st.info("""
-                **TradingView Advanced Chart Integration:**
-                - Real-time professional charts
-                - Advanced drawing tools
-                - Multiple timeframes
-                - Technical analysis tools
+                # TradingView Advanced Chart Integration
+                st.markdown("### 📊 Advanced TradingView Live Chart")
                 
-                *Note: Full TradingView integration requires API subscription*
-                """)
+                # Create tabs for different TradingView features
+                tv_tab1, tv_tab2, tv_tab3 = st.tabs(["📈 Main Chart", "📊 Technical Analysis", "⚡ Real-time Data"])
+                
+                with tv_tab1:
+                    # Main TradingView chart with multiple timeframes
+                    tradingview_main_html = f"""
+                    <!-- TradingView Widget BEGIN -->
+                    <div class="tradingview-widget-container">
+                      <div id="tradingview_main_{symbol}" style="height:600px;"></div>
+                      <div style="text-align: center; margin-top: 10px;">
+                        <span style="font-size: 11px; color: #666666;">
+                          Advanced Chart powered by <a href="https://www.tradingview.com/" rel="noopener" target="_blank">
+                          <span class="blue-text">TradingView</span></a>
+                        </span>
+                      </div>
+                      <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+                      <script type="text/javascript">
+                      new TradingView.widget(
+                        {{
+                          "autosize": true,
+                          "symbol": "{symbol}",
+                          "interval": "D",
+                          "timezone": "Etc/UTC",
+                          "theme": "light",
+                          "style": "1",
+                          "locale": "en",
+                          "toolbar_bg": "#f1f3f6",
+                          "enable_publishing": false,
+                          "allow_symbol_change": true,
+                          "hide_top_toolbar": false,
+                          "hide_side_toolbar": false,
+                          "save_image": false,
+                          "container_id": "tradingview_main_{symbol}",
+                          "studies": [
+                            "RSI@tv-basicstudies",
+                            "MACD@tv-basicstudies",
+                            "StochasticRSI@tv-basicstudies",
+                            "MASimple@tv-basicstudies",
+                            "BB@tv-basicstudies",
+                            "Volume@tv-basicstudies"
+                          ],
+                          "drawings": [
+                            "LineTool@tv-basicdrawings",
+                            "RectangleTool@tv-basicdrawings",
+                            "EllipseTool@tv-basicdrawings",
+                            "TrendLineTool@tv-basicdrawings",
+                            "FibRetracement@tv-basicdrawings"
+                          ],
+                          "overrides": {{
+                            "mainSeriesProperties.showCountdown": true,
+                            "paneProperties.background": "#ffffff",
+                            "paneProperties.vertGridProperties.color": "#f0f3f8",
+                            "paneProperties.horzGridProperties.color": "#f0f3f8",
+                            "scalesProperties.textColor": "#333333"
+                          }}
+                        }}
+                      );
+                      </script>
+                    </div>
+                    <!-- TradingView Widget END -->
+                    """
+                    st.components.v1.html(tradingview_main_html, height=650)
+                
+                with tv_tab2:
+                    # Technical Analysis Dashboard
+                    st.markdown("#### 📊 Technical Analysis Dashboard")
+                    
+                    # Multiple technical analysis widgets
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        # RSI Widget
+                        rsi_html = f"""
+                        <!-- TradingView Widget BEGIN -->
+                        <div class="tradingview-widget-container">
+                          <div class="tradingview-widget-container__widget"></div>
+                          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
+                          {{
+                            "interval": "1m",
+                            "width": "100%",
+                            "isTransparent": false,
+                            "height": "300",
+                            "symbol": "{symbol}",
+                            "showIntervalTabs": true,
+                            "locale": "en",
+                            "colorTheme": "light"
+                          }}
+                          </script>
+                        </div>
+                        <!-- TradingView Widget END -->
+                        """
+                        st.components.v1.html(rsi_html, height=320)
+                    
+                    with col2:
+                        # Market Overview
+                        market_html = f"""
+                        <!-- TradingView Widget BEGIN -->
+                        <div class="tradingview-widget-container">
+                          <div class="tradingview-widget-container__widget"></div>
+                          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js" async>
+                          {{
+                            "colorTheme": "light",
+                            "dateRange": "12M",
+                            "showChart": true,
+                            "locale": "en",
+                            "largeChartUrl": "",
+                            "isTransparent": false,
+                            "showSymbolLogo": true,
+                            "showFloatingTooltip": false,
+                            "width": "100%",
+                            "height": "300",
+                            "plotLineColorGrowing": "rgba(41, 98, 255, 1)",
+                            "plotLineColorFalling": "rgba(41, 98, 255, 1)",
+                            "gridLineColor": "rgba(240, 243, 250, 0)",
+                            "scaleFontColor": "rgba(106, 109, 120, 1)",
+                            "belowLineFillColorGrowing": "rgba(41, 98, 255, 0.12)",
+                            "belowLineFillColorFalling": "rgba(41, 98, 255, 0.12)",
+                            "belowLineFillColorGrowingBottom": "rgba(41, 98, 255, 0)",
+                            "belowLineFillColorFallingBottom": "rgba(41, 98, 255, 0)",
+                            "symbolActiveColor": "rgba(41, 98, 255, 0.12)"
+                          }}
+                          </script>
+                        </div>
+                        <!-- TradingView Widget END -->
+                        """
+                        st.components.v1.html(market_html, height=320)
+                
+                with tv_tab3:
+                    # Real-time Data and Screener
+                    st.markdown("#### ⚡ Real-time Market Data")
+                    
+                    try:
+                        # Get comprehensive real-time data
+                        stock = yf.Ticker(symbol)
+                        info = stock.info
+                        hist = stock.history(period="1d", interval="1m")
+                        
+                        if not hist.empty:
+                            latest_data = hist.iloc[-1]
+                            real_time_metrics = {
+                                "Current Price": f"${latest_data['Close']:.2f}",
+                                "Open": f"${latest_data['Open']:.2f}",
+                                "High": f"${latest_data['High']:.2f}",
+                                "Low": f"${latest_data['Low']:.2f}",
+                                "Volume": f"{latest_data['Volume']:,.0f}",
+                                "Change": f"{((latest_data['Close'] - latest_data['Open']) / latest_data['Open'] * 100):.2f}%",
+                                "Market Cap": f"${info.get('marketCap', 'N/A'):,}" if info.get('marketCap') else "N/A",
+                                "PE Ratio": f"{info.get('trailingPE', 'N/A'):.2f}" if info.get('trailingPE') else "N/A",
+                                "52W High": f"${info.get('fiftyTwoWeekHigh', 'N/A'):.2f}" if info.get('fiftyTwoWeekHigh') else "N/A",
+                                "52W Low": f"${info.get('fiftyTwoWeekLow', 'N/A'):.2f}" if info.get('fiftyTwoWeekLow') else "N/A"
+                            }
+                            
+                            # Display metrics in a grid
+                            metrics_col1, metrics_col2, metrics_col3 = st.columns(3)
+                            
+                            metrics_list = list(real_time_metrics.items())
+                            for i, (key, value) in enumerate(metrics_list):
+                                col = metrics_col1 if i % 3 == 0 else metrics_col2 if i % 3 == 1 else metrics_col3
+                                with col:
+                                    st.metric(key, value)
+                        
+                        # Real-time screener
+                        st.markdown("#### 📊 Live Market Screener")
+                        screener_html = """
+                        <!-- TradingView Widget BEGIN -->
+                        <div class="tradingview-widget-container">
+                          <div class="tradingview-widget-container__widget"></div>
+                          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-screener.js" async>
+                          {
+                            "width": "100%",
+                            "height": "400",
+                            "defaultColumn": "overview",
+                            "defaultScreen": "most_capitalized",
+                            "market": "us",
+                            "showToolbar": true,
+                            "colorTheme": "light",
+                            "locale": "en",
+                            "isTransparent": false
+                          }
+                          </script>
+                        </div>
+                        <!-- TradingView Widget END -->
+                        """
+                        st.components.v1.html(screener_html, height=420)
+                        
+                    except Exception as e:
+                        st.warning(f"Real-time data temporarily unavailable: {str(e)}")
+                        st.info("Using historical data for analysis")
             
             with tab4:
                 # Advanced metrics

@@ -15,7 +15,7 @@ def generate_long_term_recommendation(df, symbol):
     # Calculate long-term indicators
     current_price = df['Close'].iloc[-1]
     sma_20 = df['SMA_20'].iloc[-1] if 'SMA_20' in df.columns else current_price
-    sma_50 = df['SMA_50'].iloc[-1] if '极速' in df.columns else current_price
+    sma_50 = df['SMA_50'].iloc[-1] if '' in df.columns else current_price
     sma_200 = df['Close'].rolling(window=200).mean().iloc[-1] if len(df) >= 200 else None
     rsi = df['RSI'].iloc[-1] if 'RSI' in df.columns else 50
     macd = df['MACD'].iloc[-1] if 'MACD' in df.columns else 0
@@ -45,7 +45,7 @@ def generate_long_term_recommendation(df, symbol):
         else:
             recommendation += "⚠️ **Price below 200-day SMA** - Long-term bearish pressure\n"
             recommendation += f"   - Current: ${current_price:.2f} vs 200-SMA: ${sma_200:.2f}\n"
-            recommendation += "   - **极速this matters:** May indicate longer-term weakness in the stock\n"
+            recommendation += "   - **this matters:** May indicate longer-term weakness in the stock\n"
     
     if current_price > sma_50:
         recommendation += "✅ **Price above 50-day SMA** - Medium-term bullish momentum\n"
@@ -62,12 +62,12 @@ def generate_long_term_recommendation(df, symbol):
         recommendation += "   - **Why this matters:** Short-term momentum is positive\n"
     else:
         recommendation += "⚠️ **Price below 20-day SMA** - Short-term bearish\n"
-        recommendation += f"   - Current: ${current_price:.2f} vs 20-SMA: ${sma_20:.2极速}\n"
+        recommendation += f"   - Current: ${current_price:.2f} vs 20-SMA: ${sma_20:.2}\n"
         recommendation += "   - **Why this matters:** Short-term momentum is negative\n"
     
     # RSI analysis with detailed reasoning
     recommendation += "\n### 📈 RSI Analysis:\n\n"
-    if r极速 < 30:
+    if r < 30:
         recommendation += "📈 **Oversold (RSI < 30)** - Strong buying opportunity\n"
         recommendation += f"   - RSI Value: {rsi:.1f}\n"
         recommendation += "   - **Why this matters:** Historically, stocks often bounce back from oversold conditions\n"
@@ -110,7 +110,7 @@ def generate_long_term_recommendation(df, symbol):
         recommendation += "   - **Why this matters:** May indicate lack of conviction in current price levels\n"
     
     # Price momentum
-    recommendation += "\n### 🚀 Price Momentum:\极速\n"
+    recommendation += "\n### 🚀 Price Momentum:\\n"
     if price_change_1m > 0:
         recommendation += f"📈 **1-month performance: +{price_change_1m:.1f}%** - Positive short-term momentum\n"
     else:
@@ -169,7 +169,7 @@ def generate_long_term_recommendation(df, symbol):
         recommendation += "- Wait for clearer directional confirmation\n"
         recommendation += "- Consider averaging in on price dips\n"
         recommendation += "- Monitor key support and resistance levels\n"
-        recommendation += "极速**Action:** Maintain current position, watch for improvements\n"
+        recommendation += "**Action:** Maintain current position, watch for improvements\n"
         recommendation += "**Risk Level:** Medium-High\n"
         recommendation += "**Time Horizon:** Wait for confirmation\n"
         
@@ -346,7 +346,7 @@ st.markdown("""
         height: 50px;
         white-space: pre-wrap;
         background-color: #f0f2f6;
-        border-radius: 4px 4极速 0px 0px;
+        border-radius: 4px 4 0px 0px;
         gap: 1px;
         padding-top: 10px;
         padding-bottom: 10px;
@@ -411,7 +411,7 @@ if page == "Stock Analysis":
                 df = calculate_technical_indicators(df)
                 
                 # Create tabs for different analyses
-                tab1, tab2, tab3, tab极速 = st.tabs(["📈 Price Chart", "📊 Technical Analysis", "🎯 Patterns", "📋 Statistics"])
+                tab1, tab2, tab3, tab = st.tabs(["📈 Price Chart", "📊 Technical Analysis", "🎯 Patterns", "📋 Statistics"])
                 
                 with tab1:
                     # Price chart with moving averages - LARGER CHART
@@ -433,7 +433,7 @@ if page == "Stock Analysis":
                         fig.add_trace(go.Scatter(x=df.index, y=df['SMA_20'], 
                                                name='SMA 20', line=dict(color='orange', width=2)), row=1, col=1)
                     if 'SMA_50' in df.columns:
-                        fig.add_trace(go.Scatter(x=极速.index, y=df['SMA_50'], 
+                        fig.add_trace(go.Scatter(x=.index, y=df['SMA_50'], 
                                                name='SMA 50', line=dict(color='purple', width=2)), row=1, col=1)
                     
                     # Volume
@@ -463,8 +463,8 @@ if page == "Stock Analysis":
                         # MACD chart
                         if 'MACD' in df.columns and 'Signal_Line' in df.columns:
                             fig_macd = go.Figure()
-                            fig_macd.add_trace(go.Scatter(x=df.index, y=df['MACD'], name='MAC极速', line=dict(width=3)))
-                            fig_macd.add_trace(go.Scatter(x=df.index, y=df['Signal_Line'], name='Signal Line', line=极速(width=3)))
+                            fig_macd.add_trace(go.Scatter(x=df.index, y=df['MACD'], name='MAC', line=dict(width=3)))
+                            fig_macd.add_trace(go.Scatter(x=df.index, y=df['Signal_Line'], name='Signal Line', line=(width=3)))
                             fig_macd.update_layout(title="MACD Analysis", height=400)
                             st.plotly_chart(fig_macd, use_container_width=True)
                 
@@ -499,7 +499,7 @@ if page == "Stock Analysis":
                         if 'MACD' in df.columns:
                             st.metric("MACD", f"{df['MACD'].iloc[-1]:.4f}")
                         if 'Signal_Line' in df.columns:
-                            st.metric("Signal Line", f"{df['Signal_Line'].iloc[-极速]:.4f}")
+                            st.metric("Signal Line", f"{df['Signal_Line'].iloc[-]:.4f}")
                         st.metric("Volatility", f"{df['Close'].pct_change().std()*100:.2f}%")
                     
                     # Long-term recommendation

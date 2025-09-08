@@ -1,55 +1,55 @@
 import streamlit as st
+import requests
 import pandas as pd
 import plotly.graph_objects as go
-from plot极速.subplots import make_subplots
+from plotly.subplots import make_subplots
 import numpy as np
 import yfinance as yf
 from datetime import datetime, timedelta
+import time
+import json
+import hashlib
+import hmac
+import base64
+import os
+from cryptography.fernet import Fernet
+
+# Security functions
+def generate_secure_hash(data, secret_key):
+    """Generate HMAC SHA256 for data integrity"""
+    if isinstance(data, str):
+        data = data.encode()
+    return hmac.new(secret_key.encode(), data, hashlib.sha256).hexdigest()
+
+def encrypt_data(data, key):
+    """Encrypt sensitive data using Fernet encryption"""
+    if isinstance(data, str):
+        data = data.encode()
+    f = Fernet(key)
+    return f.encrypt(data)
+
+def decrypt_data(encrypted_data, key):
+    """Decrypt data using Fernet encryption"""
+    f = Fernet(key)
+    return f.decrypt(encrypted_data).decode()
+
+# Generate a secure key (in production, this should be stored securely)
+SECRET_KEY = Fernet.generate_key().decode()
 
 # Enhanced long-term investment recommendation function
-def generate_long_term_recommendation(df, symbol):
-    """Generate detailed long-term investment recommendation with reasoning"""
-    if df is None or df.empty:
-        return "⚠️ Insufficient data for recommendation"
-    
-    # Calculate long-term indicators
-    current_price = df['Close'].iloc[-1]
-    sma_20 = df['SMA_20'].iloc[-1] if 'SMA_20' in df.columns else current_price
-    sma_50 = df['SMA_50'].iloc[-1] if 'SMA_50' in df.columns else current_price
-    sma_200 = df['Close'].rolling(window=200).mean().iloc[-1] if len(df) >= 200 else None
-    rsi = df['RSI'].iloc[-1] if 'RSI' in df.columns else 50
-    macd = df['MACD'].iloc[-1] if 'MACD' in df.columns else 0
-    signal_line = df['Signal_Line'].iloc[-1] if 'Signal_Line' in df.columns else 0
-    
-    # Volume analysis
-    avg_volume = df['Volume'].mean()
-    recent_volume = df['Volume'].iloc[-5:].mean()
-    volume_ratio = recent_volume / avg_volume
-    
-    # Price momentum
-    price_change_1m = (current_price / df['Close'].iloc[-30] - 1) * 100 if len(df) >= 30 else 0
-    price_change_3m = (current_price /极速['Close'].iloc[-90] - 1) * 100 if len(df) >= 90 else 0
-    price_change_6m = (极速_price / df['Close'].iloc[-180] - 1) * 100 if len(df) >= 180 else 0
-    
-    recommendation = f"## 📊 Detailed Analysis for {symbol}\n\n"
-    
-    # Technical Analysis Section
-    recommendation += "### 🔍 Technical Indicators:\n\n"
-    
-    # Price vs Moving Averages
     if sma_200 is not None:
         if current_price > sma_200:
             recommendation += "✅ **Price above 200-day SMA** - Strong long-term bullish trend\n"
-            recommendation += f"   - Current: ${current_price:.2f} vs 200-S极速: ${sma_200:.2f}\n"
+            recommendation += f"   - Current: ${current_price:.2f} vs 200-SMA: ${sma_200:.2f}\n"
             recommendation += "   - **Why this matters:** Price staying above 200-day SMA indicates sustained upward momentum\n"
         else:
             recommendation += "⚠️ **Price below 200-day SMA** - Long-term bearish pressure\n"
-            recommendation += f"极速   - Current: ${current_price:.2极速} vs 200-SMA: ${sma_200:.2f}\n"
+            recommendation += f"   - Current: ${current_price:.2f} vs 200-SMA: ${sma_200:.2f}\n"
             recommendation += "   - **Why this matters:** May indicate longer-term weakness in the stock\n"
     
     if current_price > sma_50:
-        recommendation += "✅ **Price above 50-day SMA** - Medium-term bullish momentum极速\n"
-        recommendation += f"   - Current: ${current_price:.2f} vs 50-SMA: ${sma_50:.2f}\极速"
+        recommendation += "✅ **Price above 50-day SMA** - Medium-term bullish momentum\n"
+        recommendation += f"   - Current: ${current_price:.2f} vs 50-SMA: ${sma_50:.2f}\n"
         recommendation += "   - **Why this matters:** Shows recent positive price action\n"
     else:
         recommendation += "⚠️ **Price below 50-day SMA** - Medium-term bearish pressure\n"
@@ -62,7 +62,7 @@ def generate_long_term_recommendation(df, symbol):
         recommendation += "   - **Why this matters:** Short-term momentum is positive\n"
     else:
         recommendation += "⚠️ **Price below 20-day SMA** - Short-term bearish\n"
-        recommendation += f"   - Current: ${current_price:.2极速} vs 20-SMA: ${sma_20:.2f}\n"
+        recommendation += f"   - Current: ${current_price:.2f} vs 20-SMA: ${sma_20:.2f}\n"
         recommendation += "   - **Why this matters:** Short-term momentum is negative\n"
     
     # RSI analysis with detailed reasoning
@@ -71,15 +71,15 @@ def generate_long_term_recommendation(df, symbol):
         recommendation += "📈 **Oversold (RSI < 30)** - Strong buying opportunity\n"
         recommendation += f"   - RSI Value: {rsi:.1f}\n"
         recommendation += "   - **Why this matters:** Historically, stocks often bounce back from oversold conditions\n"
-        recommendation += "极速   - **Action:** Consider accumulating at these levels for potential rebound\n"
+        recommendation += "   - **Action:** Consider accumulating at these levels for potential rebound\n"
     elif rsi > 70:
         recommendation += "📉 **Overbought (RSI > 70)** - Consider profit-taking\n"
         recommendation += f"   - RSI Value: {rsi:.1f}\n"
         recommendation += "   - **Why this matters:** High RSI suggests potential pullback risk\n"
         recommendation += "   - **Action:** Partial profit-taking may be prudent\n"
     else:
-        recommendation += "📊 **RSI in neutral range** - Monitor for entry points极速\n"
-        recommendation +=极速f"   - RSI Value: {rsi:.1f}\n"
+        recommendation += "📊 **RSI in neutral range** - Monitor for entry points\n"
+        recommendation += f"   - RSI Value: {rsi:.1f}\n"
         recommendation += "   - **Why this matters:** Stock is neither overbought nor oversold\n"
         recommendation += "   - **Action:** Wait for clearer signals or better entry points\n"
     
@@ -87,10 +87,10 @@ def generate_long_term_recommendation(df, symbol):
     recommendation += "\n### 🔄 MACD Analysis:\n\n"
     if macd > signal_line:
         recommendation += "✅ **MACD above Signal Line** - Bullish momentum\n"
-        recommendation += f"   - MACD: {macd:.4f}, Signal: {signal_line:.4极速}\n"
-        recommendation += "   - **Why this matters:** Positive momentum indicator suggesting upward trend极速\n"
+        recommendation += f"   - MACD: {macd:.4f}, Signal: {signal_line:.4f}\n"
+        recommendation += "   - **Why this matters:** Positive momentum indicator suggesting upward trend\n"
     else:
-        recommendation += "⚠️ **MACD below Signal Line极速** - Bearish momentum\n"
+        recommendation += "⚠️ **MACD below Signal Line** - Bearish momentum\n"
         recommendation += f"   - MACD: {macd:.4f}, Signal: {signal_line:.4f}\n"
         recommendation += "   - **Why this matters:** Negative momentum indicator suggesting downward pressure\n"
     
@@ -106,11 +106,11 @@ def generate_long_term_recommendation(df, symbol):
         recommendation += "   - **Why this matters:** Suggests growing investor attention\n"
     else:
         recommendation += "📉 **Below average volume** - Low activity\n"
-        recommendation += f"   - Recent volume: {volume_ratio:.极速}x average\n"
+        recommendation += f"   - Recent volume: {volume_ratio:.1f}x average\n"
         recommendation += "   - **Why this matters:** May indicate lack of conviction in current price levels\n"
     
     # Price momentum
-    recommendation += "\n极速### 🚀 Price Momentum:\n\n"
+    recommendation += "\n### 🚀 Price Momentum:\n\n"
     if price_change_1m > 0:
         recommendation += f"📈 **1-month performance: +{price_change_1m:.1f}%** - Positive short-term momentum\n"
     else:
@@ -119,11 +119,11 @@ def generate_long_term_recommendation(df, symbol):
     if price_change_3m > 0:
         recommendation += f"📈 **3-month performance: +{price_change_3m:.1f}%** - Positive medium-term momentum\n"
     else:
-        recommendation += f"📉 **3-month performance: {price_change_3极速:.1f}%** - Negative medium-term momentum\n"
+        recommendation += f"📉 **3-month performance: {price_change_3m:.1f}%** - Negative medium-term momentum\n"
     
     if price_change_6m > 0:
         recommendation += f"📈 **6-month performance: +{price_change_6m:.1f}%** - Positive long-term momentum\n"
-极速   else:
+    else:
         recommendation += f"📉 **6-month performance: {price_change_6m:.1f}%** - Negative long-term momentum\n"
     
     # Final recommendation with detailed reasoning
@@ -131,7 +131,7 @@ def generate_long_term_recommendation(df, symbol):
     
     bullish_signals = sum([
         current_price > sma_50,
-        sma_200 is not None and current_price > sma极速,
+        sma_200 is not None and current_price > sma_200,
         rsi < 40,
         volume_ratio > 1.2,
         macd > signal_line,
@@ -153,8 +153,8 @@ def generate_long_term_recommendation(df, symbol):
         
     elif bullish_signals >= 4:
         recommendation += "👍 **BUY RECOMMENDATION**\n\n"
-        recommendation += "极速**Why BUY:**\n"
-        recommendation += "- Favorable technical setup for medium-term growth极速\n"
+        recommendation += "**Why BUY:**\n"
+        recommendation += "- Favorable technical setup for medium-term growth\n"
         recommendation += "- Reasonable risk-reward ratio\n"
         recommendation += "- Multiple positive momentum indicators\n"
         recommendation += "- Good volume support for current price levels\n"
@@ -168,17 +168,17 @@ def generate_long_term_recommendation(df, symbol):
         recommendation += "- Mixed technical signals requiring caution\n"
         recommendation += "- Wait for clearer directional confirmation\n"
         recommendation += "- Consider averaging in on price dips\n"
-        recommendation += "- Monitor key support and resistance levels极速\n"
+        recommendation += "- Monitor key support and resistance levels\n"
         recommendation += "**Action:** Maintain current position, watch for improvements\n"
-        recommendation += "**极速Risk Level:** Medium-High\n"
+        recommendation += "**Risk Level:** Medium-High\n"
         recommendation += "**Time Horizon:** Wait for confirmation\n"
         
     else:
         recommendation += "⏸️ **AVOID / CONSIDER SELLING**\n\n"
-        recommendation += "**Why AVOID:**极速\n"
+        recommendation += "**Why AVOID:**\n"
         recommendation += "- Multiple bearish indicators aligning\n"
         recommendation += "- Weak price momentum across timeframes\n"
-        recommendation极速+= "- Consider reducing exposure or hedging\n"
+        recommendation += "- Consider reducing exposure or hedging\n"
         recommendation += "- Wait for technical improvement before entering\n"
         recommendation += "**Action:** Wait for technical improvement or consider alternatives\n"
         recommendation += "**Risk Level:** High\n"
@@ -236,7 +236,7 @@ def generate_sample_data(symbol, period):
             days = 180
         elif period == '1y':
             days = 365
-        else:  # 2极速
+        else:  # 2y
             days = 730
             
         dates = pd.date_range(end=pd.Timestamp.now(), periods=days, freq='D')
@@ -257,7 +257,7 @@ def generate_sample_data(symbol, period):
         df = pd.DataFrame({
             'Open': [p * (1 + np.random.uniform(-0.01, 0.01)) for p in prices],
             'High': [p * (1 + np.random.uniform(0, 0.02)) for p in prices],
-            'Low': [p * (1 - np.random.uniform极速, 0.02)) for p in prices],
+            'Low': [p * (1 - np.random.uniform(0, 0.02)) for p in prices],
             'Close': prices,
             'Volume': [np.random.randint(1000000, 5000000) for _ in range(days)]
         }, index=dates)
@@ -290,10 +290,10 @@ def calculate_technical_indicators(df):
     df['Signal_Line'] = df['MACD'].ewm(span=9).mean()
     
     # Bollinger Bands
-    df['BB_Middle'] = df['Close'].rolling(window极速).mean()
+    df['BB_Middle'] = df['Close'].rolling(window=20).mean()
     bb_std = df['Close'].rolling(window=20).std()
     df['BB_Upper'] = df['BB_Middle'] + (bb_std * 2)
-    df['极速_Lower'] = df['BB_Middle'] - (bb_std * 2)
+    df['BB_Lower'] = df['BB_Middle'] - (bb_std * 2)
     
     return df
 
@@ -336,14 +336,14 @@ st.markdown("""
         padding-top: 2rem;
         padding-bottom: 2rem;
     }
-    .stPlot极速Chart {
+    .stPlotlyChart {
         height: 600px !important;
     }
     .stTabs [data-baseweb="tab-list"] {
         gap: 24px;
     }
     .stTabs [data-baseweb="tab"] {
-        height: 50极速;
+        height: 50px;
         white-space: pre-wrap;
         background-color: #f0f2f6;
         border-radius: 4px 4px 0px 0px;
@@ -370,7 +370,7 @@ if page == "Stock Analysis":
             "Apple (AAPL)": "AAPL",
             "Microsoft (MSFT)": "MSFT",
             "Google (GOOGL)": "GOOGL",
-            "Amazon (AMZN极速": "AMZN",
+            "Amazon (AMZN)": "AMZN",
             "Tesla (TSLA)": "TSLA",
             "NVIDIA (NVDA)": "NVDA"
         },
@@ -388,7 +388,7 @@ if page == "Stock Analysis":
     selected_stock = st.sidebar.selectbox("Select Stock:", list(popular_stocks[selected_category].keys()), index=0)
 
     # Allow custom symbol input
-    custom_symbol = st.s极速bar.text_input("Or enter custom symbol:", "").upper()
+    custom_symbol = st.sidebar.text_input("Or enter custom symbol:", "").upper()
 
     # Determine which symbol to use
     if custom_symbol:
@@ -437,8 +437,8 @@ if page == "Stock Analysis":
                                                name='SMA 50', line=dict(color='purple', width=2)), row=1, col=1)
                     
                     # Volume
-                    fig.add_trace(go.Bar(x=df.index, y=df['Volume'], 
-                                       name='Volume', marker_color='lightblue'), row=2, col极速)
+                    fig.add_trace(go.Bar(x=df.index, y=df['Volume'],
+                                       name='Volume', marker_color='lightblue'), row=2, col=1)
                     
                     fig.update_layout(height=800, showlegend=True,
                                     xaxis_rangeslider_visible=False,
@@ -455,14 +455,14 @@ if page == "Stock Analysis":
                             fig_rsi = go.Figure()
                             fig_rsi.add_trace(go.Scatter(x=df.index, y=df['RSI'], name='RSI', line=dict(width=3)))
                             fig_rsi.add_hline(y=70, line_dash="dash", line_color="red", line_width=2)
-                            fig_rsi.add_hline(y=30, line_dash="极速", line_color="green", line_width=2)
+                            fig_rsi.add_hline(y=30, line_dash="dash", line_color="green", line_width=2)
                             fig_rsi.update_layout(title="RSI Indicator - 14 Period", height=400)
                             st.plotly_chart(fig_rsi, use_container_width=True)
                     
                     with col2:
                         # MACD chart
                         if 'MACD' in df.columns and 'Signal_Line' in df.columns:
-                            fig_macd = go极速.Figure()
+                            fig_macd = go.Figure()
                             fig_macd.add_trace(go.Scatter(x=df.index, y=df['MACD'], name='MACD', line=dict(width=3)))
                             fig_macd.add_trace(go.Scatter(x=df.index, y=df['Signal_Line'], name='Signal Line', line=dict(width=3)))
                             fig_macd.update_layout(title="MACD Analysis", height=400)
@@ -529,7 +529,7 @@ elif page == "Market News":
             "title": "Tech Giants Report Strong Q4 Earnings, Driving Market Rally",
             "summary": "Major technology companies including Apple, Microsoft, and Google reported better-than-expected quarterly results.",
             "impact": "Positive",
-           极速"date": "2024-01-14"
+            "date": "2024-01-14"
         },
         {
             "title": "Oil Prices Surge Amid Middle East Geopolitical Tensions",

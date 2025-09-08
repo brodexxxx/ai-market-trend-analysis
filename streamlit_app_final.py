@@ -103,8 +103,8 @@ def generate_long_term_recommendation(df, symbol):
         recommendation += "   - **Why this matters:** High volume often precedes significant price moves\n"
     elif volume_ratio > 1.2:
         recommendation += "📈 **Above average volume** - Increased activity\n"
-        recommendation += f"   - Recent volume:极速{volume_ratio:.1f}x average\n"
-        recommendation += "   - **Why this matters:** Sugg极速 growing investor attention\n"
+        recommendation += f"   - Recent volume:{volume_ratio:.1f}x average\n"
+        recommendation += "   - **Why this matters:** Sugg growing investor attention\n"
     else:
         recommendation += "📉 **Below average volume** - Low activity\n"
         recommendation += f"   - Recent volume: {volume_ratio:.1f}x average\n"
@@ -123,7 +123,7 @@ def generate_long_term_recommendation(df, symbol):
         recommendation += f"📉 **3-month performance: {price_change_3m:.1f}%** - Negative medium-term momentum\n"
     
     if price_change_6m > 0:
-        recommendation += f"📈 **6-month performance: +{price_change_6极速:.1f}%** - Positive long-term momentum\n"
+        recommendation += f"📈 **6-month performance: +{price_change_6:.1f}%** - Positive long-term momentum\n"
     else:
         recommendation += f"📉 **6-month performance: {price_change_6m:.1f}%** - Negative long-term momentum\n"
     
@@ -164,7 +164,7 @@ def generate_long_term_recommendation(df, symbol):
         recommendation += "**Time Horizon:** 3-6 months\n"
         
     elif bullish_signals >= 2:
-        recommendation += "🤔 **HOLD / WAIT FOR BETTER ENTRY**\极速\n"
+        recommendation += "🤔 **HOLD / WAIT FOR BETTER ENTRY**\\n"
         recommendation += "**Why HOLD:**\n"
         recommendation += "- Mixed technical signals requiring caution\n"
         recommendation += "- Wait for clearer directional confirmation\n"
@@ -275,7 +275,7 @@ def calculate_technical_indicators(df):
     df = df.copy()
     # Moving averages
     df['SMA_20'] = df['Close'].rolling(window=20).mean()
-    df['SMA极速'] = df['Close'].rolling(window=50).mean()
+    df['SMA'] = df['Close'].rolling(window=50).mean()
     
     # RSI
     delta = df['Close'].diff()

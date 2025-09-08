@@ -7,12 +7,38 @@ from sklearn.svm import SVC # pyright: ignore[reportMissingModuleSource]
 from xgboost import XGBClassifier # pyright: ignore[reportMissingImports]
 from sklearn.preprocessing import StandardScaler, LabelEncoder # pyright: ignore[reportMissingModuleSource]
 from sklearn.metrics import accuracy_score, classification_report # pyright: ignore[reportMissingModuleSource]
-import tensorflow as tf # pyright: ignore[reportMissingImports]
-from tensorflow.keras.models import Sequential # pyright: ignore[reportMissingImports]
-from tensorflow.keras.layers import LSTM, Dense, Dropout, Conv1D, MaxPooling1D, Flatten # pyright: ignore[reportMissingImports]
-from tensorflow.keras.optimizers import Adam # pyright: ignore[reportMissingImports]
 import joblib
 import os
+
+# TensorFlow imports are made conditional to avoid import errors
+TF_AVAILABLE = False
+TF_MODULES = {}
+
+def _import_tensorflow():
+    """Lazy import of TensorFlow modules to avoid startup issues"""
+    global TF_AVAILABLE, TF_MODULES
+    if not TF_AVAILABLE:
+        try:
+            import tensorflow as tf # pyright: ignore[reportMissingImports]
+            from tensorflow.keras.models import Sequential # pyright: ignore[reportMissingImports]
+            from tensorflow.keras.layers import LSTM, Dense, Dropout, Conv1D, MaxPooling1D, Flatten # pyright: ignore[reportMissingImports]
+            from tensorflow.keras.optimizers import Adam # pyright: ignore[reportMissingImports]
+            TF_MODULES = {
+                'tf': tf,
+                'Sequential': Sequential,
+                'LSTM': LSTM,
+                'Dense': Dense,
+                'Dropout': Dropout,
+                'Conv1D': Conv1D,
+                'MaxPooling1D': MaxPooling1D,
+                'Flatten': Flatten,
+                'Adam': Adam
+            }
+            TF_AVAILABLE = True
+        except ImportError:
+            print("Warning: TensorFlow not available. LSTM models will not be supported.")
+            TF_AVAILABLE = False
+    return TF_AVAILABLE
 
 def prepare_data_for_training(features, model_config):
     """
@@ -21,7 +47,7 @@ def prepare_data_for_training(features, model_config):
     # Select features and target
     feature_columns = [col for col in features.columns if col not in [
         'Target_Direction', 'Target_Class', 'Target_Return', 'Symbol', 'Date'
-    ] and not col.startswith('target_')]
+    ] and not col.startswith('target_') and features[col].dtype != 'datetime64[ns]']
     
     X = features[feature_columns]
     
@@ -113,38 +139,53 @@ def save_model(model, filename):
     """
     Save the trained model to a file.
     """
-    model.save(filename)
+    if TF_AVAILABLE and hasattr(model, 'save'):
+        # TensorFlow/Keras model
+        model.save(filename)
+    else:
+        # Scikit-learn model
+        joblib.dump(model, filename)
 
 def load_model(filename):
     """
     Load a trained model from a file.
     """
-    return tf.keras.models.load_model(filename)
+    if TF_AVAILABLE:
+        try:
+            return TF_MODULES['tf'].keras.models.load_model(filename)
+        except:
+            # Fallback to joblib for non-TensorFlow models
+            return joblib.load(filename)
+    else:
+        return joblib.load(filename)
 
 def train_lstm(X_train, y_train, hyperparams):
     """
     Train LSTM model for time series
     """
+    if not _import_tensorflow():
+        raise ImportError("TensorFlow is not available. Cannot train LSTM model.")
+
     # Reshape data for LSTM [samples, timesteps, features]
     sequence_length = hyperparams.get('sequence_length', 30)
     X_reshaped = reshape_for_lstm(X_train, sequence_length)
-    
-    model = Sequential([
-        LSTM(hyperparams.get('units', 50), 
+
+    model = TF_MODULES['Sequential']([
+        TF_MODULES['LSTM'](hyperparams.get('units', 50),
              input_shape=(sequence_length, X_reshaped.shape[2]),
              dropout=hyperparams.get('dropout', 0.2),
              recurrent_dropout=hyperparams.get('recurrent_dropout', 0.2)),
-        Dense(25, activation='relu'),
-        Dropout(0.3),
-        Dense(1, activation='sigmoid')
+        TF_MODULES['Dense'](25, activation='relu'),
+        TF_MODULES['Dropout'](0.3),
+        TF_MODULES['Dense'](1, activation='sigmoid')
     ])
-    
+
     model.compile(
-        optimizer=Adam(learning_rate=hyperparams.get('learning_rate', 0.001)),
+        optimizer=TF_MODULES['Adam'](learning_rate=hyperparams.get('learning_rate', 0.001)),
         loss='binary_crossentropy',
         metrics=['accuracy']
     )
-    
+
     model.fit(
         X_reshaped, y_train[sequence_length:],
         epochs=hyperparams.get('epochs', 50),
@@ -152,10 +193,10 @@ def train_lstm(X_train, y_train, hyperparams):
         validation_split=0.2,
         verbose=1
     )
-    
+
     # Save the model after training
     save_model(model, 'models/lstm_model.h5')
-    
+
     return model
 
 def reshape_for_lstm(X, sequence_length):
