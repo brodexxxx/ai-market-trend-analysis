@@ -2,7 +2,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from streamlit_app_enhanced import (
+from streamlit_app_complete import (
     generate_ai_stock_recommendation,
     generate_long_term_recommendation,
     calculate_technical_indicators,
