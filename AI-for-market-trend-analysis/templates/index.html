@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Market Trend Analysis</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select, button {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 5px;
+            display: none;
+        }
+        .up {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .down {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #3498db;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+        .chart-container {
+            margin: 30px 0;
+            height: 400px;
+        }
+        .recommendation {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .strong-buy {
+            background: linear-gradient(135deg, #00b09b, #96c93d);
+            color: white;
+        }
+        .buy {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+        }
+        .hold {
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            color: #333;
+        }
+        .sell {
+            background: linear-gradient(135deg, #ff5858, #f09819);
+            color: white;
+        }
+        .strong-sell {
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+            color: white;
+        }
+        .technical-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .technical-card {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .technical-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📈 AI Market Trend Analysis</h1>
+        
+        <div class="form-group">
+            <label for="symbol">Select Stock Symbol:</label>
+            <select id="symbol">
+                <optgroup label="US Stocks">
+                    <option value="AAPL">Apple (AAPL)</option>
+                    <option value="MSFT">Microsoft (MSFT)</option>
+                    <option value="GOOGL">Google (GOOGL)</option>
+                    <option value="AMZN">Amazon (AMZN)</option>
+                    <option value="TSLA">Tesla (TSLA)</option>
+                    <option value="SPY">S&P 500 ETF (SPY)</option>
+                </optgroup>
+                <optgroup label="Indian Stocks">
+                    <option value="RELIANCE.NS">Reliance Industries</option>
+                    <option value="TCS.NS">Tata Consultancy Services</option>
+                    <option value="HDFCBANK.NS">HDFC Bank</option>
+                    <option value="INFY.NS">Infosys</option>
+                    <option value="ICICIBANK.NS">ICICI Bank</option>
+                    <option value="HINDUNILVR.NS">Hindustan Unilever</option>
+                    <option value="SBIN.NS">State Bank of India</option>
+                    <option value="BHARTIARTL.NS">Bharti Airtel</option>
+                    <option value="ITC.NS">ITC Limited</option>
+                    <option value="KOTAKBANK.NS">Kotak Mahindra Bank</option>
+                </optgroup>
+            </select>
+        </div>
+        
+        <button onclick="predictTrend()">Predict Market Trend</button>
+        
+        <div id="loading" class="loading" style="display: none;">
+            <p>📊 Analyzing market data and generating predictions...</p>
+        </div>
+        
+        <div id="result" class="result">
+            <h2>🎯 Prediction Result</h2>
+            
+            <div id="recommendation" class="recommendation"></div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="current-price">-</div>
+                    <div class="stat-label">Current Price</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="price-change">-</div>
+                    <div class="stat-label">Price Change</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="confidence">-</div>
+                    <div class="stat-label">Confidence</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="rsi">-</div>
+                    <div class="stat-label">RSI</div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="priceChart"></canvas>
+            </div>
+
+            <div class="technical-grid">
+                <div class="technical-card">
+                    <div class="technical-title">Moving Averages</div>
+                    <p>SMA 20: <span id="sma-20">-</span></p>
+                    <p>SMA 50: <span id="sma-50">-</span></p>
+                </div>
+                <div class="technical-card">
+                    <div class="technical-title">Support & Resistance</div>
+                    <p>Support: <span id="support">-</span></p>
+                    <p>Resistance: <span id="resistance">-</span></p>
+                </div>
+                <div class="technical-card">
+                    <div class="technical-title">Volume Analysis</div>
+                    <p>Volume Ratio: <span id="volume-ratio">-</span></p>
+                    <p>Market Sentiment: <span id="sentiment">-</span></p>
+                </div>
+                <div class="technical-card">
+                    <div class="technical-title">AI Prediction</div>
+                    <p>Direction: <span id="direction">-</span></p>
+                    <p>Signal Strength: <span id="signal-strength">-</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let priceChart = null;
+
+        async function predictTrend() {
+            const symbol = document.getElementById('symbol').value;
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ symbol: symbol })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                
+                // Update recommendation
+                const recommendation = document.getElementById('recommendation');
+                recommendation.textContent = data.recommendation;
+                recommendation.className = 'recommendation ' + getRecommendationClass(data.recommendation);
+                
+                // Update stats
+                document.getElementById('current-price').textContent = '$' + data.current_price.toFixed(2);
+                document.getElementById('price-change').textContent = data.price_change_pct.toFixed(2) + '%';
+                document.getElementById('confidence').textContent = (data.confidence * 100).toFixed(1) + '%';
+                document.getElementById('rsi').textContent = data.technical_data.rsi.toFixed(1);
+                
+                // Update technical data
+                document.getElementById('sma-20').textContent = '$' + data.technical_data.sma_20.toFixed(2);
+                document.getElementById('sma-50').textContent = '$' + data.technical_data.sma_50.toFixed(2);
+                document.getElementById('support').textContent = '$' + data.technical_data.support_level.toFixed(2);
+                document.getElementById('resistance').textContent = '$' + data.technical_data.resistance_level.toFixed(2);
+                document.getElementById('volume-ratio').textContent = data.technical_data.volume_ratio.toFixed(2) + 'x';
+                document.getElementById('direction').textContent = data.direction;
+                document.getElementById('signal-strength').textContent = data.confidence > 0.6 ? 'Strong' : 'Moderate';
+                document.getElementById('sentiment').textContent = getSentiment(data.technical_data.rsi);
+                
+                // Create price chart
+                createPriceChart(data.price_history, data.dates, data.direction);
+                
+                result.style.display = 'block';
+                
+            } catch (error) {
+                alert('Error making prediction: ' + error.message);
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        function createPriceChart(prices, dates, direction) {
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            
+            if (priceChart) {
+                priceChart.destroy();
+            }
+            
+            priceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Stock Price',
+                        data: prices,
+                        borderColor: direction === 'UP' ? '#28a745' : '#dc3545',
+                        backgroundColor: direction === 'UP' ? 'rgba(40, 167, 69, 0.1)' : 'rgba(220, 53, 69, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '30-Day Price Chart'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function getRecommendationClass(recommendation) {
+            switch(recommendation) {
+                case 'STRONG BUY': return 'strong-buy';
+                case 'BUY': return 'buy';
+                case 'HOLD': return 'hold';
+                case 'SELL': return 'sell';
+                case 'STRONG SELL': return 'strong-sell';
+                default: return 'hold';
+            }
+        }
+
+        function getSentiment(rsi) {
+            if (rsi > 70) return 'Overbought';
+            if (rsi < 30) return 'Oversold';
+            return 'Neutral';
+        }
+    </script>
+</body>
+</html>
