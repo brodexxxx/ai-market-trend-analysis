@@ -200,26 +200,30 @@ def generate_long_term_recommendation(df, symbol):
     return recommendation
 
 @st.cache_data(ttl=3600)
-def fetch_stock_data(symbol, period):
+def fetch_stock_data(symbol, period, interval='1d'):
     try:
         # Handle different symbol formats
         if not symbol.endswith('.NS') and symbol not in ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'NVDA']:
             symbol += '.NS'  # Assume Indian stock if not a common US stock
-        
+
+        # Adjust interval for real-time data
+        if period in ['1d', '5d'] and interval == '1d':
+            interval = '5m'  # Use 5-minute intervals for intraday data
+
         stock = yf.Ticker(symbol)
-        hist = stock.history(period=period)
-        
+        hist = stock.history(period=period, interval=interval)
+
         if hist.empty and symbol.endswith('.NS'):
             # Try without .NS suffix if it fails
             symbol = symbol.replace('.NS', '')
             stock = yf.Ticker(symbol)
-            hist = stock.history(period=period)
-        
+            hist = stock.history(period=period, interval=interval)
+
         if hist.empty:
             st.info(f"Real-time data for {symbol} is currently unavailable. Using sample data for demonstration.")
             # Generate sample data for demonstration
             return generate_sample_data(symbol, period)
-            
+
         return hist
     except Exception as e:
         st.error(f"Error fetching data for {symbol}: {str(e)}")

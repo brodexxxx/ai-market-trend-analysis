@@ -51,14 +51,18 @@ def load_all_models():
 # Load models on startup
 load_all_models()
 
-def fetch_stock_data(symbol, period):
-    """Fetch stock data from Yahoo Finance with improved error handling"""
+def fetch_stock_data(symbol, period, interval='1d'):
+    """Fetch stock data from Yahoo Finance with improved error handling and real-time support"""
     try:
         import yfinance as yf
         import time
 
         # Clean symbol
         symbol = symbol.upper().strip()
+
+        # Adjust interval for real-time data
+        if period in ['1d', '5d'] and interval == '1d':
+            interval = '5m'  # Use 5-minute intervals for intraday data
 
         # Try different symbol formats for better success rate
         symbol_variants = [symbol]
@@ -73,14 +77,14 @@ def fetch_stock_data(symbol, period):
 
         for sym in symbol_variants:
             try:
-                print(f"Trying to fetch data for {sym}...")
+                print(f"Trying to fetch data for {sym} with period={period}, interval={interval}...")
                 stock = yf.Ticker(sym)
 
                 # Add timeout and retry mechanism
                 max_retries = 3
                 for attempt in range(max_retries):
                     try:
-                        hist = stock.history(period=period, timeout=30)
+                        hist = stock.history(period=period, interval=interval, timeout=30)
                         if not hist.empty:
                             print(f"✓ Successfully fetched data for {sym}")
                             return hist
@@ -104,7 +108,7 @@ def fetch_stock_data(symbol, period):
                 if short_period != period:
                     try:
                         stock = yf.Ticker(symbol)
-                        hist = stock.history(period=short_period, timeout=30)
+                        hist = stock.history(period=short_period, interval=interval, timeout=30)
                         if not hist.empty:
                             print(f"✓ Fetched data for {symbol} with shorter period {short_period}")
                             return hist

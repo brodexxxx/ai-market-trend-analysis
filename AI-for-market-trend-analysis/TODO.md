@@ -1,100 +1,50 @@
-# AI Stock Market Analysis Platform Enhancement Plan
+# Real-Time Data Enhancement Plan
 
-## ✅ COMPLETED
-### Phase 1: Bug Fixes & Core Improvements
-- [x] Fix syntax errors in streamlit_app_complete.py
-- [x] Add comprehensive error handling
-- [x] Fix yfinance data fetching issues (removed unsupported headers parameter)
-- [x] Implement proper logging system
-- [x] Add input validation and data sanitization
+## Overview
+Enhance the AI for market trend analysis project to support real-time data fetching with intraday intervals, auto-refresh functionality, and improved user experience.
 
-### Phase 2: Model Accuracy Enhancement (Target: 70%+)
-- [x] Implement ensemble methods (voting classifiers, stacking)
-- [x] Add advanced feature selection and engineering
-- [x] Implement hyperparameter optimization
-- [x] Add cross-validation with time series splits
-- [x] Implement model calibration for probability estimates
-- [x] Add feature importance analysis and selection
-- [x] Implement model explainability (SHAP, LIME)
-- [x] Add model validation and overfitting detection
+## Tasks
 
-## 🔄 CURRENT PHASE: Phase 3 - New Professional Features
+### 1. Update Data Fetching Functions
+- [x] Modify fetch_stock_data in all apps to support interval parameter
+- [x] Use intraday intervals (1m, 5m, 15m) for recent periods (1d, 5d)
+- [x] Add fallback to sample data on API failures
+- [x] Handle symbol variations (.NS suffix, etc.)
 
-### Portfolio Management System
-- [ ] Create portfolio tracking module (src/portfolio_manager.py)
-- [ ] Implement portfolio performance calculations
-- [ ] Add portfolio diversification analysis
-- [ ] Create portfolio rebalancing recommendations
-- [ ] Add portfolio risk metrics (VaR, volatility)
+### 2. Add Auto-Refresh Functionality
+- [x] Add auto-refresh checkbox in sidebar
+- [x] Add refresh interval slider (5-30 minutes)
+- [x] Implement auto-refresh using streamlit rerun
+- [x] Display last update timestamp
 
-### Risk Assessment Tools
-- [ ] Implement Value at Risk (VaR) calculations
-- [ ] Add portfolio correlation analysis
-- [ ] Create risk-adjusted return metrics
-- [ ] Implement stress testing capabilities
-- [ ] Add scenario analysis tools
+### 3. Update Streamlit Apps
+- [x] advanced_stock_analysis.py - Add interval controls, auto-refresh
+- [ ] streamlit_app_enhanced_v2.py - Update fetch function
+- [ ] streamlit_app_enhanced_final.py - Update fetch function
+- [ ] streamlit_app_fixed.py - Update fetch function
+- [ ] Other streamlit apps - Update as needed
 
-### Advanced Technical Indicators
-- [ ] Add Stochastic Oscillator indicator
-- [ ] Implement Williams %R indicator
-- [ ] Add Ichimoku Cloud analysis
-- [ ] Implement Fibonacci retracement levels
-- [ ] Add Volume Profile analysis
+### 4. Update API Service
+- [ ] src/api_service.py - Add interval parameter support
+- [ ] Update Flask routes to accept interval
 
-### Sentiment Analysis Integration
-- [ ] Create news sentiment analysis module
-- [ ] Integrate social media sentiment tracking
-- [ ] Add market sentiment indicators
-- [ ] Implement sentiment-based trading signals
+### 5. Update Data Processing
+- [ ] src/data_preprocessing.py - Support intraday intervals
+- [ ] Update feature engineering for intraday data
 
-### Automated Trading Signals
-- [ ] Create multi-timeframe analysis system
-- [ ] Implement signal strength scoring
-- [ ] Add automated alert system
-- [ ] Create signal backtesting framework
+### 6. Testing and Validation
+- [ ] Test data fetching with new intervals
+- [ ] Verify auto-refresh works
+- [ ] Check performance impact
+- [ ] Validate technical indicators with intraday data
 
-### Backtesting Engine
-- [ ] Build comprehensive backtesting module
-- [ ] Add strategy performance metrics
-- [ ] Implement walk-forward analysis
-- [ ] Create strategy optimization tools
+### 7. Documentation
+- [ ] Update README with real-time features
+- [ ] Add usage guide for new features
 
-### Performance Analytics Dashboard
-- [ ] Add Sharpe ratio calculations
-- [ ] Implement Sortino ratio analysis
-- [ ] Add maximum drawdown tracking
-- [ ] Create performance attribution analysis
+## Prediction Accuracy
+Current model accuracy needs to be evaluated and reported.
 
-## 📋 UPCOMING PHASES
-
-### Phase 4: Performance & Security
-- [ ] Implement Redis/memory caching
-- [ ] Add rate limiting and API quota management
-- [ ] Optimize database queries
-- [ ] Implement user authentication and session management
-- [ ] Add data encryption for sensitive information
-- [ ] Implement API key rotation and secure storage
-- [ ] Add comprehensive logging and monitoring
-
-### Phase 5: UI/UX Enhancements
-- [ ] Modern responsive design with dark/light themes
-- [ ] Interactive dashboards with real-time updates
-- [ ] Advanced charting with multiple technical indicators
-- [ ] Customizable alert system and notifications
-- [ ] Export capabilities (PDF, Excel, CSV)
-- [ ] Mobile-optimized interface
-- [ ] Progressive Web App (PWA) capabilities
-
-## 🎯 IMMEDIATE NEXT STEPS
-1. Create portfolio management module
-2. Implement advanced technical indicators
-3. Add risk assessment tools
-4. Integrate sentiment analysis
-5. Build automated trading signals system
-
-## 📊 TARGET METRICS
-- Model Accuracy: 70%+ (Current: ~55.81%)
-- New Features: 15+ professional features
-- Performance: 50% faster loading times
-- Security: Enterprise-grade protection
-- UI/UX: Modern, responsive design
+## Dependencies
+- yfinance (already included)
+- No new dependencies needed for basic real-time features

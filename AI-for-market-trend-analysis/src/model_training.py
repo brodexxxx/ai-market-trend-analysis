@@ -297,7 +297,7 @@ def cross_validate_model(features, model_config, cv_folds=5):
 if __name__ == "__main__":
     # Test the model training
     import yfinance as yf
-    from src.feature_engineering import engineer_features
+    from feature_engineering import engineer_features
     
     # Fetch sample data
     df = yf.download('AAPL', period='1y', interval='1d')

@@ -168,15 +168,20 @@ def calculate_accuracy_metrics(df):
     }
 
 @ErrorHandler.handle_error
-def fetch_stock_data(symbol, period):
-    """Fetch stock data with enhanced error handling"""
+def fetch_stock_data(symbol, period, interval='1d'):
+    """Fetch stock data with enhanced error handling and real-time support"""
     try:
         stock = yf.Ticker(symbol)
-        hist = stock.history(period=period)
-        
-        if hist.empty or len(hist) < 20:
+
+        # Use intraday intervals for real-time data
+        if period in ['1d', '5d'] and interval == '1d':
+            interval = '5m'  # Default to 5-minute intervals for recent data
+
+        hist = stock.history(period=period, interval=interval)
+
+        if hist.empty or len(hist) < 5:
             return ErrorHandler.generate_fallback_data(symbol, period)
-            
+
         return hist
     except Exception as e:
         st.error(f"Data fetch error: {str(e)}")
@@ -388,12 +393,32 @@ if custom_symbol:
 else:
     symbol = popular_stocks[selected_category][selected_stock]
 
-period = st.sidebar.selectbox("Time Frame:", ["1mo", "3mo", "6mo", "1y"], index=1)
+period = st.sidebar.selectbox("Time Frame:", ["1d", "5d", "1mo", "3mo", "6mo", "1y"], index=0)
+interval = st.sidebar.selectbox("Data Interval:", ["1m", "5m", "15m", "1h", "1d"], index=1)
 analysis_depth = st.sidebar.slider("Analysis Depth:", 1, 10, 7)
+
+# Auto-refresh settings
+auto_refresh = st.sidebar.checkbox("Enable Auto-Refresh", value=True)
+refresh_interval = st.sidebar.slider("Refresh Interval (minutes):", 5, 60, 10)
+
+# Last update timestamp
+if 'last_update' not in st.session_state:
+    st.session_state.last_update = datetime.now()
+
+st.sidebar.markdown(f"**Last Update:** {st.session_state.last_update.strftime('%H:%M:%S')}")
+
+# Auto-refresh logic
+if auto_refresh:
+    current_time = datetime.now()
+    time_diff = (current_time - st.session_state.last_update).total_seconds() / 60  # in minutes
+
+    if time_diff >= refresh_interval:
+        st.session_state.last_update = current_time
+        st.rerun()
 
 if st.sidebar.button("🚀 Analyze Stock", type="primary"):
     with st.spinner("🔍 Running advanced analysis..."):
-        df = fetch_stock_data(symbol, period)
+        df = fetch_stock_data(symbol, period, interval)
         
         if df is not None and not df.empty:
             df = calculate_technical_indicators(df)

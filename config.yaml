@@ -1,0 +1,42 @@
+# Configuration file for AI-for-market-trend-analysis
+
+# API keys and secrets
+api_keys:
+  yahoo_finance: "YOUR_YAHOO_FINANCE_API_KEY"
+  tradingview: "YOUR_TRADINGVIEW_API_KEY"
+
+# Model parameters
+model:
+  lstm:
+    input_size: 10
+    hidden_size: 50
+    num_layers: 2
+    dropout: 0.2
+    learning_rate: 0.001
+    batch_size: 64
+    epochs: 100
+
+# Data settings
+data:
+  source: "yahoo_finance"
+  symbols:
+    - AAPL
+    - MSFT
+    - GOOGL
+  start_date: "2015-01-01"
+  end_date: "2023-12-31"
+
+# Logging settings
+logging:
+  level: "INFO"
+  file: "logs/security.log"
+
+# Security settings
+security:
+  secret_key: "your_secret_key_here"
+  rate_limit_per_minute: 60
+
+# Deployment settings
+deployment:
+  streamlit_main_file: "AI-for-market-trend-analysis/streamlit_app_complete.py"
+  port: 8501
