@@ -22,8 +22,8 @@ A sophisticated, AI-powered stock analysis application built with Streamlit that
 
 1. **Clone the repository**
    ```bash
-   git clone <your-repository-url>
-   cd advanced-stock-analyzer
+   git clone https://github.com/brodexxxx/ai-market-trend-analysis.git
+   cd AI-for-market-trend-analysis
    ```
 
 2. **Install dependencies**
@@ -33,7 +33,7 @@ A sophisticated, AI-powered stock analysis application built with Streamlit that
 
 3. **Run the application**
    ```bash
-   streamlit run advanced_stock_analyzer.py
+   streamlit run advanced_stock_analysis.py
    ```
 
 4. **Open your browser**
@@ -104,7 +104,7 @@ The application requires the following Python packages:
    git add .
    git commit -m "Initial commit"
    git branch -M main
-   git remote add origin <your-github-repo-url>
+   git remote add origin https://github.com/brodexxxx/ai-market-trend-analysis.git
    git push -u origin main
    ```
 
@@ -112,7 +112,7 @@ The application requires the following Python packages:
    - Go to [Streamlit Cloud](https://streamlit.io/cloud)
    - Connect your GitHub account
    - Select your repository
-   - Set main file to `advanced_stock_analyzer.py`
+   - Set main file to `advanced_stock_analysis.py`
    - Deploy!
 
 ### Local Deployment Options
