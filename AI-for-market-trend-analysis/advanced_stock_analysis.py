@@ -524,7 +524,38 @@ if st.sidebar.button("🚀 Analyze Stock", type="primary"):
                 
                 with col2:
                     # Add more technical charts here
-                    st.info("Additional technical indicators will be displayed here")
+                    # Display additional technical indicators such as Stochastic RSI, OBV, and ADX
+                    if 'Close' in df.columns:
+                        # Stochastic RSI calculation
+                        delta = df['Close'].diff()
+                        gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
+                        loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+                        rs = gain / loss
+                        rsi = 100 - (100 / (1 + rs))
+                        stoch_rsi = (rsi - rsi.rolling(window=14).min()) / (rsi.rolling(window=14).max() - rsi.rolling(window=14).min())
+                        st.line_chart(stoch_rsi.fillna(0), height=200, use_container_width=True, label="Stochastic RSI")
+
+                        # On-Balance Volume (OBV)
+                        obv = (np.sign(df['Close'].diff()) * df['Volume']).fillna(0).cumsum()
+                        st.line_chart(obv, height=200, use_container_width=True, label="On-Balance Volume (OBV)")
+
+                        # Average Directional Index (ADX) - simplified version
+                        high_low = df['High'] - df['Low']
+                        high_close = np.abs(df['High'] - df['Close'].shift())
+                        low_close = np.abs(df['Low'] - df['Close'].shift())
+                        tr = high_low.combine(high_close, max).combine(low_close, max)
+                        atr = tr.rolling(window=14).mean()
+                        plus_dm = df['High'].diff()
+                        minus_dm = df['Low'].diff()
+                        plus_dm[plus_dm < 0] = 0
+                        minus_dm[minus_dm > 0] = 0
+                        plus_di = 100 * (plus_dm.rolling(window=14).mean() / atr)
+                        minus_di = abs(100 * (minus_dm.rolling(window=14).mean() / atr))
+                        dx = (abs(plus_di - minus_di) / (plus_di + minus_di)) * 100
+                        adx = dx.rolling(window=14).mean()
+                        st.line_chart(adx.fillna(0), height=200, use_container_width=True, label="Average Directional Index (ADX)")
+                    else:
+                        st.info("Additional technical indicators will be displayed here")
             
             with tab3:
                 # AI Recommendations

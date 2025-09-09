@@ -116,12 +116,12 @@ def generate_long_term_recommendation(df, symbol):
         if current_price > sma_200:
             recommendation += "✅ **Price above 200-day SMA** - Bullish long-term trend\n"
         else:
-            recommendation += "⚠️ **Price below 200-day SMA** - Bearish long-term trend极n"
-    
+            recommendation += "⚠️ **Price below 200-day SMA** - Bearish long-term trend\n"
+
     if current_price > sma_50:
         recommendation += "✅ **Price above 50-day SMA** - Medium-term bullish\n"
     else:
-        recommendation += "⚠️ **Price below 50极day SMA** - Medium-term bearish\n"
+        recommendation += "⚠️ **Price below 50-day SMA** - Medium-term bearish\n"
     
     # RSI analysis
     if rsi < 30:
@@ -148,8 +148,8 @@ def generate_long_term_recommendation(df, symbol):
     if bullish_signals >= 3:
         recommendation += "\n🎯 **STRONG BUY** - Multiple bullish indicators align for long-term growth"
     elif bullish_signals >= 2:
-        recommendation += "\n👍 **极UY** - Favorable conditions for long-term investment"
-    elif bullish_signals >= 极:
+        recommendation += "\n👍 **BUY** - Favorable conditions for long-term investment"
+    elif bullish_signals >= 1:
         recommendation += "\n🤔 **HOLD** - Monitor for better entry points"
     else:
         recommendation += "\n⏸️ **WAIT** - Consider waiting for more favorable conditions"
@@ -160,7 +160,7 @@ def generate_long_term_recommendation(df, symbol):
 def fetch_stock_data(symbol, period):
     try:
         # Handle different symbol formats
-        if not symbol.endswith('.NS') and symbol not in ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TS极A', 'NVDA']:
+        if not symbol.endswith('.NS') and symbol not in ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'NVDA']:
             symbol += '.NS'  # Assume Indian stock if not a common US stock
         
         stock = yf.Ticker(symbol)
